@@ -106,6 +106,7 @@ def test_keras_initialization_is_repeatable():
 
 
 def test_keras_can_memorize_tiny_batch():
+    """Verify that Keras can memorize a tiny dataset."""
     keras.backend.clear_session()
     keras.utils.set_random_seed(2026)
 
@@ -115,14 +116,30 @@ def test_keras_can_memorize_tiny_batch():
         loss="mse",
     )
 
-    features = np.zeros((4, 8), dtype=np.float32)
-    targets = np.full((4,), 5.0, dtype=np.float32)
+    rng = np.random.default_rng(2026)
+    features = rng.normal(size=(4, 8)).astype(np.float32)
 
-    model.fit(features, targets, epochs=100, verbose=0)
+    targets = (
+        2.0 * features[:, 0] - 1.5 * features[:, 1] + 0.5 * features[:, 2]
+    ).astype(np.float32)
+
+    initial_predictions = model(features, training=False).numpy().reshape(-1)
+    initial_mse = float(np.mean((initial_predictions - targets) ** 2))
+
+    model.fit(
+        features,
+        targets,
+        epochs=300,
+        batch_size=4,
+        shuffle=False,
+        verbose=0,
+    )
 
     predictions = model(features, training=False).numpy().reshape(-1)
+    final_mse = float(np.mean((predictions - targets) ** 2))
 
-    assert np.mean((predictions - targets) ** 2) < 0.1
+    assert final_mse < initial_mse
+    assert final_mse < 0.1
 
 
 def test_best_weights_are_restored():
@@ -158,6 +175,3 @@ def test_best_weights_are_restored():
     best_loss = min(history.history["val_loss"])
 
     assert final_loss == pytest.approx(best_loss, abs=1e-3)
-
-
-
