@@ -1,0 +1,16 @@
+{
+  "seed": 2026,
+  "selected_experiment": "higher_learning_rate",
+  "selected_validation_mse": 13.673297284444173,
+  "neural_network_test_mse": 12.944907455444335,
+  "baselines": {
+    "mean_baseline": {
+      "validation_mse": 201.02601623535156,
+      "test_mse": 190.29151916503906
+    },
+    "linear_regression": {
+      "validation_mse": 172.8228759765625,
+      "test_mse": 159.7902374267578
+    }
+  }
+}

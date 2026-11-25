@@ -1,0 +1,4 @@
+name,hidden_sizes,learning_rate,best_epoch,validation_mse
+main,"(64, 32)",0.001,100,18.22344317118327
+higher_learning_rate,"(64, 32)",0.005,65,13.673297284444173
+wider_first_layer,"(128, 32)",0.001,100,21.06143882751465

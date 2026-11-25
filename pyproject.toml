@@ -1,0 +1,12 @@
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 88
+src = [".", "tests"]
+exclude = [".git", ".venv", "bikes_data.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
