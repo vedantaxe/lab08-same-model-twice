@@ -1,121 +1,104 @@
+# Lab 08 — The Same Model, Twice
 
-# Lab 07 — A Network from First Principles
+## Overview
 
-## What it does
+This project compares equivalent PyTorch and Keras neural networks for predicting bike rental demand. It extends the Lab 07 PyTorch implementation with a Keras model, framework equivalence checks, reproducible training experiments, automated tests, and a comparison report.
 
-This project builds a PyTorch neural network from first principles to predict hourly bike rentals using simulated bike-share data.
+## Model Architecture
 
-The project implements custom data preparation, PyTorch Dataset and DataLoader objects, a feed-forward neural network, a manual training loop, baseline comparisons, and controlled experiments.
+Both frameworks use the same feedforward neural network:
 
-## How to run it
+- Input: 8 features
+- First hidden layer: 64 neurons, ReLU activation
+- Second hidden layer: 32 neurons, ReLU activation
+- Output: 1 neuron with linear activation
+- Total trainable parameters: 2,689
 
-Create the Conda environment:
+Training uses Adam optimization, a learning rate of 0.001, a batch size of 64, and up to 100 epochs.
 
-```bash
+## Setup
+
+Create and activate the Conda environment:
+
+```powershell
 conda env create -f environment.yml
-conda activate lab07-first-principles
+conda activate lab08-same-model-twice
 ```
 
-Run the full experiment:
+## Running the Project
 
-```bash
+Train the original PyTorch implementation:
+
+```powershell
 python train.py
 ```
 
-Run the required quality checks:
+Train the Keras implementation:
 
-```bash
-python -m ruff format --check .
-python -m ruff check .
-python -m pytest
+```powershell
+python train_keras.py
 ```
 
-## Data and split
+Compare both frameworks across three random seeds:
 
-The provided `bikes_data.py` generates 6,000 deterministic bike rental records.
+```powershell
+python compare.py
+```
 
-Input features:
+The comparison uses seeds 2026, 2027, and 2028.
 
-- hour
-- temperature_c
-- rain_mm
-- wind_kph
-- is_weekend
-- station_type
+## Testing and Code Quality
 
-Target: rentals.
+Run all automated tests:
 
-Data is split before preprocessing:
+```powershell
+python -m pytest -q
+```
 
-- Training: 3,600 rows (60%)
-- Validation: 1,200 rows (20%)
-- Test: 1,200 rows (20%)
+Check linting:
 
-Numerical features are standardized and station types are one-hot encoded.
+```powershell
+python -m ruff check .
+```
 
-The preprocessing transformations are fitted only on training data to prevent leakage.
+Check formatting:
 
-## Model and training
+```powershell
+python -m ruff format --check .
+```
 
-The main neural network architecture is:
-
-8 inputs → 64 neurons → ReLU → 32 neurons → ReLU → 1 output.
-
-The model uses mean squared error loss and the Adam optimizer.
-
-The training loop explicitly implements:
-
-- optimizer.zero_grad()
-- loss.backward()
-- optimizer.step()
-
-The best model checkpoint is selected using validation loss and restored after training.
+The test suite covers PyTorch training behavior, Keras architecture, parameter counts, equivalent predictions after weight copying, reproducibility, model serialization, and memorization of a small dataset.
 
 ## Results
 
-The best experiment used a learning rate of 0.005.
-
-| Model | Validation MSE | Test MSE |
+| Metric | PyTorch | Keras |
 |---|---:|---:|
-| Training-mean baseline | 201.0260 | 190.2915 |
-| Linear regression | 172.8229 | 159.7902 |
-| Selected neural network | 13.6733 | 12.9449 |
+| Average validation MAE | 3.5231 | 3.5605 |
+| Average test MAE | 3.5504 | 3.5364 |
+| Average training time | 18.92 s | 30.38 s |
 
-The selected neural network substantially outperformed both baselines on the generated dataset.
+Both frameworks demonstrated comparable predictive accuracy. PyTorch trained faster in these experiments, while Keras provided a convenient high-level training interface.
 
-## Experiments
+For the complete interpretation and recommendation, see `COMPARISON.md`.
 
-Three neural network configurations were compared:
+## Key Files
 
-| Experiment | Hidden layers | Learning rate | Best epoch | Validation MSE |
-|---|---|---|---:|---:|
-| Main | (64, 32) | 0.001 | 100 | 18.2234 |
-| Higher learning rate | (64, 32) | 0.005 | 65 | 13.6733 |
-| Wider first layer | (128, 32) | 0.001 | 100 | 21.0614 |
+| File | Purpose |
+|---|---|
+| `model.py` | PyTorch network architecture |
+| `keras_model.py` | Equivalent Keras network and weight-copying utilities |
+| `prepare.py` | Data generation and preprocessing |
+| `training.py` | PyTorch training functions |
+| `train.py` | Original PyTorch training workflow |
+| `train_keras.py` | Keras training workflow |
+| `compare.py` | Three-seed framework comparison |
+| `tests/` | Automated tests |
+| `COMPARISON.md` | Experimental findings and recommendation |
+| `reports/comparison.csv` | Per-seed comparison results |
+| `reports/keras_history.csv` | Keras training history |
+| `reports/keras_learning_curves.png` | Keras learning curves |
+| `reports/best_keras_model.keras` | Saved Keras model |
 
-Each experiment changed only one hyperparameter relative to the main configuration.
+## Conclusion
 
-The best configuration was selected using validation performance, not test performance.
-
-Generated reports are stored in the `reports/` directory.
-
-## Limitations
-
-- The dataset is simulated rather than collected from real bike-share stations.
-- The model has not been evaluated on real-world rental demand.
-- Only three neural network configurations were tested.
-- Results may differ on other datasets.
-- The network does not explicitly enforce nonnegative predictions.
-- Additional experiments and longer training could improve performance.
-
-## Project files
-
-- `bikes_data.py` — Provided data generator
-- `prepare.py` — Data splitting and preprocessing
-- `model.py` — PyTorch neural network
-- `training.py` — Training and evaluation loops
-- `baselines.py` — Baseline comparisons
-- `experiments.py` — Controlled experiments
-- `train.py` — Full experiment runner
-- `tests/` — Automated tests
-- `reports/` — Generated metrics, CSV files, and plots
+The experiment demonstrates that equivalent neural networks can be implemented in different frameworks while producing similar predictive performance. Framework selection should consider training efficiency, maintainability, team familiarity, and deployment requirements.
