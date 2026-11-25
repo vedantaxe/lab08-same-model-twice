@@ -1,4 +1,3 @@
-
 """Train the Keras bike rental model and save reports."""
 
 from pathlib import Path
